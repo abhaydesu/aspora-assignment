@@ -8,9 +8,10 @@ import './MemberGrid.css';
 interface MemberGridProps {
   onSelectMember: (member: Member) => void;
   columns?: number;
+  updatedMember?: Member | null;
 }
 
-export const MemberGrid: React.FC<MemberGridProps> = ({ onSelectMember, columns = 3 }) => {
+export const MemberGrid: React.FC<MemberGridProps> = ({ onSelectMember, columns = 3, updatedMember }) => {
   const [members, setMembers] = useState<Member[]>([]);
   const [bookmarks, setBookmarks] = useState<Set<number>>(new Set());
   const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
@@ -39,6 +40,11 @@ export const MemberGrid: React.FC<MemberGridProps> = ({ onSelectMember, columns 
         setIsLoading(false);
       })
   }, [ filters.status, filters.role]);
+
+  useEffect(() => {
+    if (!updatedMember) return;
+    setMembers(prev => prev.map(m => m.id === updatedMember.id ? updatedMember : m));
+  }, [updatedMember]);
 
   const handleBookmark = useCallback((id: number) => {
     setBookmarks(prev => {
@@ -77,7 +83,7 @@ export const MemberGrid: React.FC<MemberGridProps> = ({ onSelectMember, columns 
           </button>
         </div>
       </div>
-      <div className="member-grid__cards" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
+      <div className="member-grid__cards" style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
         {displayMembers.length === 0 && <p className="member-grid__empty">No members found</p>}
         {displayMembers.map(member => (
           <MemberCard

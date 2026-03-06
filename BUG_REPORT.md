@@ -238,4 +238,126 @@
     3. Implemented conditional early returns to display a loading indicator or error message, ensuring the "No members found" message only appears if the API successfully returns an empty array.
 - **Connected to another bug?** No
 
+## Bug 19 — Header Search & Notification Dropdowns Don't Close
+
+- **Exact error / console output:** No console error
+- **Steps to reproduce:**
+    1. Open the app at `localhost:5173`.
+    2. Type in the member search box to see search results dropdown.
+    3. Click outside the search box or elsewhere on the page.
+    4. Observe that the dropdown stays open.
+    5. Repeat with the notification bell — toggle it open, then click elsewhere.
+- **Viewport / device tested:** Desktop Chrome
+- **Symptom — what you saw:** Both dropdowns persist on screen indefinitely. Only way to close them is to clear the search query or toggle the bell again.
+- **Root cause — the why:** The `Header` component had no click-outside handlers for the search results dropdown, and the notification dropdown click-outside handler did not cover the search dropdown. Additionally, clicking on a search result item did nothing, leaving the results visible after selection.
+- **Fix and why it works:** 
+    1. Added a `searchRef` to the search container and included it in the existing click-outside handler.
+    2. Updated `handleClickOutside` to check both `notificationRef` and `searchRef`, closing whichever dropdown the user clicked outside.
+    3. Added an `onClick` handler to search result items that clears the query and results when a result is selected.
+- **Connected to another bug?** No
+
 ---
+
+## Bug 20 — MemberModal Tag Addition Mutates Original Array
+
+- **Exact error / console output:** No console error
+- **Steps to reproduce:**
+  1. Open the app at `localhost:5173`.
+  2. Click on a member card to open the modal.
+  3. Add a new tag.
+  4. Open the same member's modal again and observe the tag count.
+- **Viewport / device tested:** Desktop Chrome
+- **Symptom — what you saw:** Tags appeared to add correctly in the modal, but the mutation could cause stale renders and subtle state inconsistencies — the original member object in the grid's state array was silently modified in place.
+- **Root cause — the why:** `{ ...selectedMember }` is a shallow copy. The `tags` property is an array (a reference type), so `updated.tags` and `selectedMember.tags` pointed to the same array in memory. Calling `.push()` on `updated.tags` mutated the original directly, bypassing React's immutability contract.
+- **Fix and why it works:** Replaced the spread-then-push pattern with `{ ...selectedMember, tags: [...selectedMember.tags, newTag.trim()] }`. This creates a fresh array in the same spread operation, so the original member's tag array is never touched.
+- **Connected to another bug?** Yes — Bug 25 (tag persistence regression).
+
+---
+
+## Bug 21 — API Bookmarks Ignored on Load
+
+- **Exact error / console output:** No console error (visual state mismatch)
+- **Steps to reproduce:**
+  1. Open the app at `localhost:5173`.
+  2. Observe members that have `bookmarked: true` in the seed data (e.g., Aisha Patel).
+  3. Check whether their bookmark star is golden on initial load.
+- **Viewport / device tested:** Desktop Chrome
+- **Symptom — what you saw:** Members seeded with `bookmarked: true` appeared un-bookmarked (empty star) until the user manually clicked the star.
+- **Root cause — the why:** The local `bookmarks` Set was initialised as `new Set()` (empty). The `displayMembers` derivation overrode every member's `bookmarked` field with `bookmarks.has(m.id)`, so the API value was discarded entirely on every render.
+- **Fix and why it works:** After fetching, the Set is seeded from the returned data: `data.forEach(m => { if (m.bookmarked) seeded.add(m.id) })`. Using the functional updater form preserves any bookmarks the user has toggled in a previous filter-refresh cycle.
+- **Connected to another bug?** No
+
+---
+
+## Bug 22 — Activity Feed Checkboxes Track Member, Not Activity
+
+- **Exact error / console output:** No console error (incorrect UX behaviour)
+- **Steps to reproduce:**
+  1. Open the app and navigate to the Activity Feed.
+  2. Find two activities that belong to the same member.
+  3. Check the checkbox on one of them.
+  4. Observe the other activity's checkbox.
+- **Viewport / device tested:** Desktop Chrome
+- **Symptom — what you saw:** Checking one activity auto-checked all other activities from the same member. Unchecking either one unchecked all of them simultaneously. Additionally, checking two separate activities from the same member created duplicate `memberId` entries in `selectedIds`.
+- **Root cause — the why:** The checkbox state was keyed on `activity.memberId` instead of `activity.id`. Multiple activities can share the same `memberId`, so they shared a single checked state.
+- **Fix and why it works:** Changed `selectedIds` to track `activity.id` (unique per activity). When "Batch Assign Role" is triggered, the handler derives unique member IDs from the selected activity IDs using `new Set(activities.filter(a => selectedIds.includes(a.id)).map(a => a.memberId))`, so each member is only updated once even if multiple of their activities were selected.
+- **Connected to another bug?** No
+
+## Bug 23 — Tag Persistence Regression + No Tag Removal
+
+- **Exact error / console output:** No console error (silent data loss)
+- **Steps to reproduce:**
+  1. Open the app and click a member card.
+  2. Add a tag in the modal, then close it.
+  3. Re-open the same member's modal.
+  4. Observe whether the added tag is still present.
+- **Viewport / device tested:** Desktop Chrome
+- **Symptom — what you saw:** Newly added tags disappeared when the modal was closed and reopened. Additionally, there was no way to remove existing tags — no delete button existed.
+- **Root cause — the why:** `onUpdateMember` in Dashboard only updated `selectedMember` (the modal's local state) — the `members` array inside `MemberGrid` was never updated. When the modal was reopened, `MemberGrid` passed the original stale member object back, discarding any tag changes.
+- **Fix and why it works:**
+  1. **Persistence:** `Dashboard` now passes `updatedMember={selectedMember}` to `MemberGrid`. A new `useEffect` in `MemberGrid` watches `updatedMember` and syncs it into the `members` array: `setMembers(prev => prev.map(m => m.id === updatedMember.id ? updatedMember : m))`.
+  2. **Removal:** Added `handleRemoveTag` in `MemberModal` using immutable `.filter()`. Each tag chip now renders a `×` button (`.member-modal__tag-remove`) that calls the handler on click.
+- **Connected to another bug?** Yes — Bug 20 (shallow copy mutation).
+
+---
+
+## Bug 24 — Header Search Result Click Does Nothing
+
+- **Exact error / console output:** No console error (broken navigation)
+- **Steps to reproduce:**
+  1. Open the app at `localhost:5173`.
+  2. Type a member name into the header search box.
+  3. Click on any result in the dropdown.
+- **Viewport / device tested:** Desktop Chrome
+- **Symptom — what you saw:** Clicking a search result closed the dropdown (after the Bug 19 fix) but did not navigate to the Dashboard or open the member's detail modal. The user had no way to act on a result.
+- **Root cause — the why:** The result items had no `onClick` wired to any navigation or member-selection logic. `Header` also had no `onSelectMember` prop, so there was no channel to propagate a selection upward.
+- **Fix and why it works:** Lifted member selection state to `App.tsx` as `pendingMember`. `Header` now accepts `onSelectMember`, which sets `pendingMember` and navigates to `dashboard`. `Dashboard` accepts `initialMember` and a `useEffect` syncs it into local `selectedMember` state, opening the modal immediately. `onMemberModalClosed` clears `pendingMember` so re-navigating later doesn't accidentally re-open the modal.
+- **Connected to another bug?** Yes — Bug 19 (search dropdown not closing).
+
+---
+
+## Bug 25 — No Way to Reset All Filters at Once
+
+- **Exact error / console output:** No console error (UX gap)
+- **Steps to reproduce:**
+  1. Open the app and set both a Status filter and a Role filter in the sidebar.
+  2. Try to clear both filters with a single interaction.
+- **Viewport / device tested:** Desktop Chrome
+- **Symptom — what you saw:** There was no "Clear filters" button. The user had to manually reset the Status radio back to "All Statuses" and the Role select back to "All Roles" — two separate interactions.
+- **Root cause — the why:** `FilterContext` only exposed `updateFilter` (one key at a time). No bulk-reset function existed, and the Sidebar had no UI for it.
+- **Fix and why it works:** Added `clearFilters: () => setFilters({ status: '', role: '' })` to `FilterContext`. In the Sidebar, the "Filters" heading row is now a flex container with a conditionally rendered "Clear" button that appears only when `filters.status || filters.role` is truthy, and disappears once both are reset.
+- **Connected to another bug?** No
+
+---
+
+## Bug 26 — Keyboard Shortcut Label Hardcoded to `⌘K` on All Platforms
+
+- **Exact error / console output:** No console error (incorrect UI label)
+- **Steps to reproduce:**
+  1. Open the app on a Windows or Linux machine.
+  2. Observe the keyboard shortcut hint next to "Search Comments" in the sidebar.
+- **Viewport / device tested:** Windows Chrome, Linux Chrome
+- **Symptom — what you saw:** The shortcut badge always displayed `⌘K` (Mac symbol) even on Windows/Linux where the correct shortcut is `Ctrl+K`.
+- **Root cause — the why:** The `<kbd>` element in `Sidebar.tsx` had the label hardcoded to `⌘K`. The keyboard handler in `App.tsx` already correctly accepted both `e.metaKey` and `e.ctrlKey`, but the visual label never reflected this.
+- **Fix and why it works:** Added a module-level `isMac` constant using `navigator.platform` (`/mac/i` test). The `<kbd>` now renders `{isMac ? '⌘K' : 'Ctrl+K'}` — evaluated once at load time with no re-render cost.
+- **Connected to another bug?** No

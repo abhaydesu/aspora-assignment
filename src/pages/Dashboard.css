@@ -28,14 +28,28 @@
 }
 
 .dashboard__top > :last-child {
-  flex: 0 0 280px;
+  flex: 0 0 360px;
+  max-width: 360px;
+}
+
+/* Tablet: timer drops below stat cards, both full width */
+@media (max-width: 1024px) {
+  .dashboard__top > :last-child {
+    flex: 0 0 300px;
+    max-width: 300px;
+  }
 }
 
 @media (max-width: 900px) {
   .dashboard__top {
     flex-direction: column;
+    height: auto;
   }
+  .dashboard__top > :first-child,
   .dashboard__top > :last-child {
     flex: none;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
   }
 }

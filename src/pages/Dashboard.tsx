@@ -10,16 +10,22 @@ function calculateColumns() {
   return window.innerWidth < 768 ? 1 : window.innerWidth < 1024 ? 2 : 3;
 }
 
-export const Dashboard: React.FC = () => {
-  const [selectedMember, setSelectedMember] = useState<Member | null>(null);
+export const Dashboard: React.FC<{
+  initialMember?: Member | null;
+  onMemberModalClosed?: () => void;
+}> = ({ initialMember, onMemberModalClosed }) => {
+  const [selectedMember, setSelectedMember] = useState<Member | null>(initialMember ?? null);
   const [gridCols, setGridCols] = useState(() => calculateColumns());
+
+  useEffect(() => {
+    if (initialMember) setSelectedMember(initialMember);
+  }, [initialMember]);
 
   useEffect(() => {
     const resizeEvent = () => {
       setGridCols(calculateColumns());
     }
     window.addEventListener('resize', resizeEvent);
-
     return () => window.removeEventListener('resize', resizeEvent);
   }, []);
 
@@ -33,11 +39,14 @@ export const Dashboard: React.FC = () => {
         <StatsCards />
         <StandupTimer />
       </div>
-      <MemberGrid onSelectMember={setSelectedMember} columns={gridCols} />
+      <MemberGrid onSelectMember={setSelectedMember} columns={gridCols} updatedMember={selectedMember} />
       {selectedMember && (
         <MemberModal
           member={selectedMember}
-          onClose={() => setSelectedMember(null)}
+          onClose={() => {
+            setSelectedMember(null);
+            onMemberModalClosed?.();
+          }}
           onUpdateMember={(updated) => setSelectedMember(updated)}
         />
       )}

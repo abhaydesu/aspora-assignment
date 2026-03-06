@@ -26,6 +26,12 @@ export const MemberModal: React.FC<MemberModalProps> = ({ member, onClose, onUpd
     setNewTag('');
   };
 
+  const handleRemoveTag = (tagToRemove: string) => {
+    const updated = { ...selectedMember, tags: selectedMember.tags.filter(t => t !== tagToRemove) };
+    setSelectedMember(updated);
+    onUpdateMember(updated);
+  };
+
   return (
     <div className="member-modal__backdrop" onClick={onClose}>
       <div
@@ -51,7 +57,16 @@ export const MemberModal: React.FC<MemberModalProps> = ({ member, onClose, onUpd
             <h3>Tags</h3>
             <div className="member-modal__tags">
               {selectedMember.tags.map(tag => (
-                <span key={tag} className="member-modal__tag">{tag}</span>
+                <span key={tag} className="member-modal__tag">
+                  {tag}
+                  <button
+                    className="member-modal__tag-remove"
+                    onClick={() => handleRemoveTag(tag)}
+                    aria-label={`Remove tag ${tag}`}
+                  >
+                    ×
+                  </button>
+                </span>
               ))}
             </div>
             <div className="member-modal__add-tag">

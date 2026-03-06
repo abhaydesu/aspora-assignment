@@ -35,6 +35,7 @@ export const StatsCards: React.FC = () => {
   const total = useAnimatedCounter(members.length);
   const active = useAnimatedCounter(members.filter(m => m.status === 'active').length);
   const onLeave = useAnimatedCounter(members.filter(m => m.status === 'on-leave').length);
+  const offline = useAnimatedCounter(members.filter(m => m.status === 'offline').length);
 
   return (
     <div className="stats-cards">
@@ -52,6 +53,11 @@ export const StatsCards: React.FC = () => {
         <span className="stats-cards__icon">🏖️</span>
         <span className="stats-cards__value">{onLeave}</span>
         <span className="stats-cards__label">On Leave</span>
+      </div>
+      <div className="stats-cards__card stats-cards__card--offline">
+        <span className="stats-cards__icon">💤</span>
+        <span className="stats-cards__value">{offline}</span>
+        <span className="stats-cards__label">Offline</span>
       </div>
     </div>
   );

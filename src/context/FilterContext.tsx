@@ -8,6 +8,7 @@ export interface FilterState {
 interface FilterContextType {
   filters: FilterState;
   updateFilter: (key: keyof FilterState, value: string) => void;
+  clearFilters: () => void;
 }
 
 const FilterContext = createContext<FilterContextType | null>(null);
@@ -25,8 +26,10 @@ export const FilterProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     }));
   };
 
+  const clearFilters = () => setFilters({ status: '', role: '' });
+
   return (
-    <FilterContext.Provider value={{ filters, updateFilter }}>
+    <FilterContext.Provider value={{ filters, updateFilter, clearFilters }}>
       {children}
     </FilterContext.Provider>
   );

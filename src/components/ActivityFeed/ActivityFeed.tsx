@@ -83,6 +83,7 @@ export const ActivityFeed: React.FC = () => {
         {filtered.map((activity) => (
           <div key={activity.id} className="activity-feed__item">
             <input
+              id={`activity-${activity.id}`}
               type="checkbox"
               checked={selectedIds.includes(activity.id)}
               onChange={(e) => {
@@ -93,7 +94,7 @@ export const ActivityFeed: React.FC = () => {
                 }
               }}
             />
-            <div className="activity-feed__item-content">
+            <label htmlFor={`activity-${activity.id}`} className="activity-feed__item-content">
               <strong>{activity.memberName}</strong>
               <span>{activity.action}</span>
               <time>{new Date(activity.timestamp).toLocaleString()}</time>
@@ -102,8 +103,9 @@ export const ActivityFeed: React.FC = () => {
                 type="text"
                 defaultValue={activity.note}
                 placeholder="Add note..."
+                onClick={(e) => e.stopPropagation()}
               />
-            </div>
+            </label>
           </div>
         ))}
       </div>

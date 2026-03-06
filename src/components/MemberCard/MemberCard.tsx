@@ -24,6 +24,10 @@ export const MemberCard = React.memo<MemberCardProps>(({ member, isBookmarked, o
     <div className="member-card" onClick={() => onClick(member)}>
       <div className="member-card__header">
         <div className="member-card__avatar" style={{ background: avatarBg }}>{member.avatar}</div>
+        <div className="member-card__info">
+          <h3 className="member-card__name">{member.name}</h3>
+          <p className="member-card__role">{member.role}</p>
+        </div>
         <button
           className={`member-card__bookmark${isBookmarked ? ' member-card__bookmark--active' : ''}`}
           onClick={(e) => {
@@ -34,12 +38,14 @@ export const MemberCard = React.memo<MemberCardProps>(({ member, isBookmarked, o
           <span className="icon">{isBookmarked ? '★' : '☆'}</span>
         </button>
       </div>
-      <h3 className="member-card__name">{member.name}</h3>
-      <p className="member-card__role">{member.role}</p>
-      <span className={`member-card__status member-card__status--${member.status}`}>
-        {member.status === 'on-leave' ? 'On Leave' : member.status.charAt(0).toUpperCase() + member.status.slice(1)}
-      </span>
-      <p className="member-card__team">{member.team?.name ?? 'Unassigned'}</p>
+
+      <div className="member-card__meta">
+        <span className={`member-card__status member-card__status--${member.status}`}>
+          {member.status === 'on-leave' ? 'On Leave' : member.status.charAt(0).toUpperCase() + member.status.slice(1)}
+        </span>
+        <span className="member-card__team">{member.team?.name ?? 'Unassigned'}</span>
+      </div>
+
       <div className="member-card__tags">
         {member.tags.map(tag => (
           <span key={tag} className="member-card__tag">{tag}</span>

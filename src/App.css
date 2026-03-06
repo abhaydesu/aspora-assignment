@@ -18,6 +18,7 @@
   border-bottom: 1px solid var(--border);
   transform: translateZ(0); /* GPU acceleration */
   box-shadow: var(--shadow-xs);
+  overflow: visible; /* allow expanded search to escape */
 }
 
 .app-body {
@@ -38,7 +39,6 @@
   display: flex;
   flex-direction: column;
   gap: 28px;
-  max-width: 1200px;
 }
 
 .dashboard-content .action-bar button {
@@ -60,5 +60,37 @@
 @media (max-width: 768px) {
   .main-content {
     padding: 16px;
+  }
+
+  /* Hide sidebar from normal flow on mobile — it's position:fixed */
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 240px;
+    min-width: 240px;
+  }
+}
+
+/* ── Mobile sidebar backdrop ─────────────────────────── */
+.sidebar-backdrop {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 299;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    animation: sidebarFadeIn 0.2s ease;
+  }
+
+  @keyframes sidebarFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
   }
 }

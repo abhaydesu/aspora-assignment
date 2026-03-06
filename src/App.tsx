@@ -7,6 +7,7 @@ import { Sidebar } from './components/Sidebar/Sidebar';
 import { Dashboard } from './pages/Dashboard';
 import { ActivityPage } from './pages/ActivityPage';
 import { SearchOverlay } from './components/Search/SearchOverlay';
+import type { Member } from './api/mockApi';
 import './App.css';
 
 type Page = 'dashboard' | 'activity';
@@ -14,6 +15,8 @@ type Page = 'dashboard' | 'activity';
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<Page>('dashboard');
   const [searchOpen, setSearchOpen] = useState(false);
+  const [pendingMember, setPendingMember] = useState<Member | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -27,21 +30,43 @@ const App: React.FC = () => {
     return () => document.removeEventListener('keydown', handleKey);
   }, []);
 
+  const handleSelectMember = (member: Member) => {
+    setPendingMember(member);
+    setCurrentPage('dashboard');
+  };
+
   return (
     <ThemeProvider>
       <FilterProvider>
         <ToastProvider>
           <div className="app-layout">
-            <Header onNavigate={(page) => setCurrentPage(page as Page)} />
+            <Header
+              onNavigate={(page) => setCurrentPage(page as Page)}
+              onSelectMember={handleSelectMember}
+              onMenuClick={() => setSidebarOpen(true)}
+            />
+
+            {/* Mobile sidebar backdrop */}
+            {sidebarOpen && (
+              <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />
+            )}
+
             <div className="app-body">
               <Sidebar
                 currentPage={currentPage}
-                onNavigate={setCurrentPage}
-                onOpenSearch={() => setSearchOpen(true)}
+                onNavigate={(page) => { setCurrentPage(page); setSidebarOpen(false); }}
+                onOpenSearch={() => { setSearchOpen(true); setSidebarOpen(false); }}
+                isOpen={sidebarOpen}
+                onClose={() => setSidebarOpen(false)}
               />
               <main className="main-content">
                 <div className="dashboard-content">
-                  {currentPage === 'dashboard' && <Dashboard />}
+                  {currentPage === 'dashboard' && (
+                    <Dashboard
+                      initialMember={pendingMember}
+                      onMemberModalClosed={() => setPendingMember(null)}
+                    />
+                  )}
                   {currentPage === 'activity' && <ActivityPage />}
                 </div>
               </main>
