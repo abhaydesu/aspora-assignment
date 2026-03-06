@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NotificationDropdown } from '../NotificationDropdown/NotificationDropdown';
 import { searchMembers } from '../../api/mockApi';
 import type { Member } from '../../api/mockApi';
@@ -16,6 +16,17 @@ export const Header: React.FC<{ onNavigate: (page: string) => void }> = ({ onNav
   const [greeting, setGreeting] = useState(() => computeGreeting());
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchResults, setSearchResults] = useState<Member[]>([]);
+  const notificationRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (notificationRef.current && !notificationRef.current.contains(e.target as Node)) {
+        setShowNotifications(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const greetInterval = setInterval(() => {
@@ -68,13 +79,15 @@ export const Header: React.FC<{ onNavigate: (page: string) => void }> = ({ onNav
       </div>
       <div className="header__right">
         <span className="header__greeting">{greeting}, John</span>
-        <button
-          className="header__notification-btn"
-          onClick={() => setShowNotifications(!showNotifications)}
-        >
-          🔔
-        </button>
-        {showNotifications && <NotificationDropdown />}
+        <div ref={notificationRef} style={{ position: 'relative' }}>
+          <button
+            className="header__notification-btn"
+            onClick={() => setShowNotifications(!showNotifications)}
+          >
+            🔔
+          </button>
+          {showNotifications && <NotificationDropdown />}
+        </div>
         <div className="header__avatar">JD</div>
       </div>
     </header>
