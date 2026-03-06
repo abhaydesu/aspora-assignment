@@ -82,33 +82,6 @@ Each `ResultItem` is memoised so that keyboard navigation only re-renders the pr
 
 ---
 
-## Bugs Fixed
-
-18 bugs were identified and fixed. Full details with root causes, reproduction steps, and explanations are in [`BUG_REPORT.md`](./BUG_REPORT.md).
-
-| # | Bug | Commit |
-|---|-----|--------|
-| 1 | Header infinite re-render | `12ecfb1` |
-| 2 | Infinite API calls (object in dep array) | `ab0eadf` |
-| 3 | Filters not updating dashboard (state mutation) | `ab0eadf` |
-| 4 | Standup timer freezes after first tick | `05cc9f4` |
-| 5 | Hardcoded 3-column grid on mobile | `1ad4634` |
-| 6 | Window resize event listener leak | `1ad4634` |
-| 7 | Keyboard shortcut duplicate listeners | `1ad4634` |
-| 8 | Search debouncing & uncontrolled input | `d36dc9a` |
-| 9 | Notification click handler (`var` scope) | `aa94063` |
-| 10 | Crash on null team member modal | `520f3da` |
-| 11 | Activity feed duplication on mount | `520f3da` |
-| 12 | Array index used as React key | `520f3da` |
-| 13 | Batch assign false success | `1592b98` |
-| 14 | Bookmark count ignores filters | `1592b98` |
-| 15 | Stats cards 2-column on mobile | `3915327` |
-| 16 | Toast animation fails to play | `35e2334` |
-| 17 | Toast ID collisions across re-renders | `1ba67ed` |
-| 18 | Missing loading/error lifecycle states | `1ba67ed` |
-
----
-
 ## Time Log
 
 | Task | Approx. Time |
@@ -118,7 +91,9 @@ Each `ResultItem` is memoised so that keyboard navigation only re-renders the pr
 | Search feature | ~2.5 hrs |
 | UI polish & bug-report write-up | ~1 hr |
 | README, docs & final review | ~1 hr |
-| **Total** | **~9 hrs** |
+| UI redesign and responsive check| ~2 hrs |
+| UX improvements (Activity Feed, filters, notifications) | ~1 hr |
+| **Total** | **~12 hrs** |
 
 ---
 
