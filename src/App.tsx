@@ -17,13 +17,15 @@ const App: React.FC = () => {
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         setSearchOpen(true);
       }
     };
     document.addEventListener('keydown', handleKey);
-  }, [currentPage]);
+
+    return () => document.removeEventListener('keydown', handleKey);
+  }, []);
 
   return (
     <ThemeProvider>

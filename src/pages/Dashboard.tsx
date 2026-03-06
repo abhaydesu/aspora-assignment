@@ -6,15 +6,22 @@ import { MemberModal } from '../components/MemberModal/MemberModal';
 import type { Member } from '../api/mockApi';
 import './Dashboard.css';
 
+function calculateColumns() { 
+  return window.innerWidth < 768 ? 1 : window.innerWidth < 1024 ? 2 : 3;
+}
+
 export const Dashboard: React.FC = () => {
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
-  const [gridCols, setGridCols] = useState(3);
+  const [gridCols, setGridCols] = useState(() => calculateColumns());
 
   useEffect(() => {
-    window.addEventListener('resize', () => {
+    const resizeEvent = () => {
       console.log('resize handler fired');
-      setGridCols(window.innerWidth < 768 ? 1 : window.innerWidth < 1024 ? 2 : 3);
-    });
+      setGridCols(calculateColumns());
+    }
+    window.addEventListener('resize', resizeEvent);
+
+    return () => window.removeEventListener('resize', resizeEvent);
   }, []);
 
   return (

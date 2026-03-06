@@ -25,7 +25,7 @@
 - **Fix and why it works:** Extracted the primitive values directly into the array (`[filters.status, filters.role]`). React correctly compares string/boolean primitives across renders, breaking the loop.
 - **Connected to another bug?** Yes, Bug 3. The infinite re-render forced the component to update and masked the improper state updating.
 
-# Bug 3 — Filters Not Updating Dashboard (Direct State Mutation)
+## Bug 3 — Filters Not Updating Dashboard
 
 - **Exact error / console output:** no console error
 - **Steps to reproduce:**
@@ -38,7 +38,7 @@
 - **Fix and why it works:** Replaced the state updation logic using the spread operator. This generates a brand-new object in memory, forcing React to re-render.
 - **Connected to another bug?** Yes. Connected to Bug 2, which previously masked this issue via forced, continuous re-renders.
 
-## Bug 4 — Standup Timer Freezes (Stale Closure)
+## Bug 4 — Standup Timer Freezes
 
 - **Exact error / console output:** no console error 
 - **Steps to reproduce:**
@@ -50,3 +50,44 @@
 - **Root cause — the why:** The `useEffect` had an empty dependency array but referenced the `timeLeft` state inside the `setInterval`. The interval captured the initial value of `timeLeft` when the component mounted, and kept redundantly setting the state to `initialState - 1` every single second. Also, the interval lacked a cleanup function, leaving a timer running in the background.
 - **Fix and why it works:** Updated the `useEffect` to recalculate the absolute time difference every second (`setTimeLeft(getSecondsUntilStandup())`) instead of doing relative math (`timeLeft - 1`). Added `return () => clearInterval(clockTimer);` to properly clean the interval when the component unmounts.
 - **Connected to another bug?** no
+
+## Bug 5 — Harcoded grid state
+
+- **Exact error / console output:** no console error, visual UX issue.
+- **Steps to reproduce:**
+  1. Open the app at `localhost:5173` using a mobile device or a narrow browser window (< 768px).
+  2. Observe the number of columns in the member grid on the initial load.
+- **Viewport / device tested:** Mobile (< 768px)
+- **Symptom — what you saw:** The grid forces 3 columns instead of 1 on the initial load.
+- **Root cause — the why:** The initial state was hardcoded (`useState(3)`), meaning the component always painted 3 columns on the first render regardless of the actual screen size.
+- **Fix and why it works:** Created a `calculateColumns` helper function and Used lazy initialization (`useState(() => calculateColumns())`) so the component instantly calculates the correct layout on the very first render.
+- **Connected to another bug?** no
+
+---
+
+## Bug 6 — Window Resize Event Memory Leak
+
+- **Exact error / console output:** no console error.
+- **Steps to reproduce:**
+  1. Open the app at `localhost:5173`.
+  2. Navigate away from the Dashboard to another page, and then back again multiple times.
+  3. Resize the window and observe the console logs or memory usage.
+- **Viewport / device tested:** Desktop Chrome
+- **Symptom — what you saw:** Navigating away and back to the component trioggers duplicate background event listeners. 
+- **Root cause — the why:** The `useEffect` attached a `window.addEventListener` didn't have a cleanup function. So the event listener persisted in memory even after the `<Dashboard>` component was destroyed.
+- **Fix and why it works:** Inside the `useEffect`, a cleanup function was implemented.
+- **Connected to another bug?** no
+
+## Bug 7 — Keyboard Shortcut Duplicate Listeners
+
+- **Exact error / console output:** no console error
+- **Steps to reproduce:**
+  1. Open the app at `localhost:5173`.
+  2. Navigate back and forth between the 'Dashboard' and 'Activity' pages several times.
+  3. Press `Cmd + K` (Mac) or `Ctrl + K` (Windows).
+- **Viewport / device tested:** Desktop Chrome
+- **Symptom — what you saw:** Navigating between pages silently duplicates the global `keydown` event listener. A single keystroke eventually triggers the state update multiple times simultaneously, degrading performance.
+- **Root cause — the why:** The `useEffect` managing the keydown event listener lacked a cleanup function. Additionally, `currentPage` was unnecessarily included in the dependency array. 
+- **Fix and why it works:** Implemented a cleanup function. Changed the dependency array to be empty `[]`. Added `.toLowerCase()` to the key check to ensure the shortcut runs even if Caps Lock or Shift is active.
+- **Connected to another bug?** no
+
