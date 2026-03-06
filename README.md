@@ -113,9 +113,9 @@ Each `ResultItem` is memoised so that keyboard navigation only re-renders the pr
 
 | Task | Approx. Time |
 |------|-------------|
-| Initial exploration & understanding the codebase | ~0.5 hr |
-| Bug hunting & fixing (18 bugs) | ~3.5 hrs |
-| Search feature (hooks, component, CSS) | ~2.5 hrs |
+| Initial exploration  | ~0.5 hr |
+| Bug hunting & fixing | ~3.5 hrs |
+| Search feature | ~2.5 hrs |
 | UI polish & bug-report write-up | ~1 hr |
 | README, docs & final review | ~1 hr |
 | **Total** | **~9 hrs** |
