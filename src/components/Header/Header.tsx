@@ -12,21 +12,15 @@ function computeGreeting(): string {
 }
 
 export const Header: React.FC<{ onNavigate: (page: string) => void }> = ({ onNavigate }) => {
-  const [query, setQuery] = useState<string | undefined>();
+  const [query, setQuery] = useState<string>('');
   const [greeting, setGreeting] = useState(() => computeGreeting());
   const [showNotifications, setShowNotifications] = useState(false);
   const [searchResults, setSearchResults] = useState<Member[]>([]);
 
   useEffect(() => {
     const greetInterval = setInterval(() => {
-      const currentGreeting = computeGreeting();
 
-      setGreeting(prevGreeting => {
-        if (currentGreeting != prevGreeting) {
-          return currentGreeting;
-        }
-        return prevGreeting;
-      })
+      setGreeting(computeGreeting());
     }, 60000)
 
     return () => clearInterval(greetInterval);
@@ -37,11 +31,13 @@ export const Header: React.FC<{ onNavigate: (page: string) => void }> = ({ onNav
       setSearchResults([]);
       return;
     }
-    setTimeout(() => {
+    const queryTimeout = setTimeout(() => {
       searchMembers(query).then(results => {
         setSearchResults(results);
       });
     }, 300);
+
+    return () => clearTimeout(queryTimeout);
   }, [query]);
 
   return (

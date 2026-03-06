@@ -91,3 +91,16 @@
 - **Fix and why it works:** Implemented a cleanup function. Changed the dependency array to be empty `[]`. Added `.toLowerCase()` to the key check to ensure the shortcut runs even if Caps Lock or Shift is active.
 - **Connected to another bug?** no
 
+## Bug 8 — Search Debouncing & Uncontrolled Input
+
+- **Exact error / console output:** `Warning: A component is changing an uncontrolled input to be controlled.` (Console warning for the input). No console error for the API race condition.
+- **Steps to reproduce:**
+  1. Open the app at `localhost:5173`.
+  2. Open the browser console (to see the uncontrolled input warning).
+  3. Type rapidly into the "Search members..." input field.
+  4. Observe the browser's Network tab.
+- **Viewport / device tested:** Desktop Chrome
+- **Symptom — what you saw:** The console threw a red warning on the very first keystroke. Furthermore, typing rapidly spawned a massive spike of concurrent API requests. Because network speeds vary, older search requests could resolve *after* newer ones, causing the UI to display outdated or mismatched search results.
+- **Root cause — the why:** There were two mainly issues here. First, the `query` state was initialized without a default value, causing React to treat the HTML input as "uncontrolled" until the user typed the first character. Second, the search `useEffect` utilized a `setTimeout` to delay the API call, but failed to return a cleanup function. So the pending timers were not cancelled when the `query` changed.
+- **Fix and why it works:** Initialized the `query` state with an empty string to ensure React fully controls the input from the initial render, eliminating the console warning. In the `useEffect`a cleanup function was implemented. Now, if a user types a new character before the 300ms window closes, React automatically destroys the old timer, ensuring only one API call is made after the user stops typing.
+- **Connected to another bug?** no
