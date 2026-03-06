@@ -4,6 +4,7 @@ import './MemberCard.css';
 
 interface MemberCardProps {
   member: Member;
+  isBookmarked: boolean;
   onBookmark: (id: number) => void;
   onClick: (member: Member) => void;
 }
@@ -16,7 +17,7 @@ const AVATAR_GRADIENTS = [
   'linear-gradient(135deg, #3b82f6, #6366f1)',
 ];
 
-export const MemberCard = React.memo<MemberCardProps>(({ member, onBookmark, onClick }) => {
+export const MemberCard = React.memo<MemberCardProps>(({ member, isBookmarked, onBookmark, onClick }) => {
   const avatarBg = AVATAR_GRADIENTS[member.name.charCodeAt(0) % AVATAR_GRADIENTS.length];
 
   return (
@@ -24,13 +25,13 @@ export const MemberCard = React.memo<MemberCardProps>(({ member, onBookmark, onC
       <div className="member-card__header">
         <div className="member-card__avatar" style={{ background: avatarBg }}>{member.avatar}</div>
         <button
-          className={`member-card__bookmark${member.bookmarked ? ' member-card__bookmark--active' : ''}`}
+          className={`member-card__bookmark${isBookmarked ? ' member-card__bookmark--active' : ''}`}
           onClick={(e) => {
             e.stopPropagation();
             onBookmark(member.id);
           }}
         >
-          <span className="icon">{member.bookmarked ? '★' : '☆'}</span>
+          <span className="icon">{isBookmarked ? '★' : '☆'}</span>
         </button>
       </div>
       <h3 className="member-card__name">{member.name}</h3>

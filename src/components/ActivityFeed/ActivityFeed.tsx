@@ -47,8 +47,13 @@ export const ActivityFeed: React.FC = () => {
 
   const handleBatchAssign = () => {
     if (selectedIds.length === 0) return;
+    const memberIds = [...new Set(
+      activities
+        .filter(a => selectedIds.includes(a.id))
+        .map(a => a.memberId)
+    )];
     batchAssignRole(
-      selectedIds,
+      memberIds,
       'Senior Engineer',
       updateMemberRole,
       () => showToast('All roles updated!'),
@@ -79,12 +84,12 @@ export const ActivityFeed: React.FC = () => {
           <div key={activity.id} className="activity-feed__item">
             <input
               type="checkbox"
-              checked={selectedIds.includes(activity.memberId)}
+              checked={selectedIds.includes(activity.id)}
               onChange={(e) => {
                 if (e.target.checked) {
-                  setSelectedIds(prev => [...prev, activity.memberId]);
+                  setSelectedIds(prev => [...prev, activity.id]);
                 } else {
-                  setSelectedIds(prev => prev.filter(id => id !== activity.memberId));
+                  setSelectedIds(prev => prev.filter(id => id !== activity.id));
                 }
               }}
             />

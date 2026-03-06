@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { fetchMembers } from '../../api/mockApi';
 import { MemberCard } from '../MemberCard/MemberCard';
 import { useFilters } from '../../context/FilterContext';
@@ -40,19 +40,22 @@ export const MemberGrid: React.FC<MemberGridProps> = ({ onSelectMember, columns 
       })
   }, [ filters.status, filters.role]);
 
-  const handleBookmark = (id: number) => {
-    const next = new Set(bookmarks);
-    if (next.has(id)) {
-      next.delete(id);
-    } else {
-      next.add(id);
-    }
-    setBookmarks(next);
-  };
+  const handleBookmark = useCallback((id: number) => {
+    setBookmarks(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
 
-  const displayMembers = members
-    .map(m => ({ ...m, bookmarked: bookmarks.has(m.id) }))
-    .filter(m => !showBookmarkedOnly || m.bookmarked);
+  const displayMembers = useMemo(
+    () => members.filter(m => !showBookmarkedOnly || bookmarks.has(m.id)),
+    [members, bookmarks, showBookmarkedOnly]
+  );
 
   if (isLoading) return <div className='member-grid__loading'>Loading team data...</div>
 
@@ -80,6 +83,7 @@ export const MemberGrid: React.FC<MemberGridProps> = ({ onSelectMember, columns 
           <MemberCard
             key={member.id}
             member={member}
+            isBookmarked={bookmarks.has(member.id)}
             onBookmark={handleBookmark}
             onClick={onSelectMember}
           />
