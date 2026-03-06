@@ -27,6 +27,11 @@ export const MemberGrid: React.FC<MemberGridProps> = ({ onSelectMember, columns 
     fetchMembers(filters)
       .then(data => {
         setMembers(data);
+        setBookmarks(prev => {
+          const seeded = new Set(prev);
+          data.forEach(m => { if (m.bookmarked) seeded.add(m.id); });
+          return seeded;
+        });
         setIsLoading(false);
       })
       .catch(() => {

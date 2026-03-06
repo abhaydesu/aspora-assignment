@@ -20,8 +20,7 @@ export const MemberModal: React.FC<MemberModalProps> = ({ member, onClose, onUpd
 
   const handleAddTag = () => {
     if (!newTag.trim()) return;
-    const updated = { ...selectedMember };
-    updated.tags.push(newTag.trim());
+    const updated = { ...selectedMember, tags: [...selectedMember.tags, newTag.trim()] };
     setSelectedMember(updated);
     onUpdateMember(updated);
     setNewTag('');

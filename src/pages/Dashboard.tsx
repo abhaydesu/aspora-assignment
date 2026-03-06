@@ -16,7 +16,6 @@ export const Dashboard: React.FC = () => {
 
   useEffect(() => {
     const resizeEvent = () => {
-      console.log('resize handler fired');
       setGridCols(calculateColumns());
     }
     window.addEventListener('resize', resizeEvent);
