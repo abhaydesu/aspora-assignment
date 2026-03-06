@@ -24,7 +24,7 @@ export const MemberCard = React.memo<MemberCardProps>(({ member, onBookmark, onC
       <div className="member-card__header">
         <div className="member-card__avatar" style={{ background: avatarBg }}>{member.avatar}</div>
         <button
-          className="member-card__bookmark"
+          className={`member-card__bookmark${member.bookmarked ? ' member-card__bookmark--active' : ''}`}
           onClick={(e) => {
             e.stopPropagation();
             onBookmark(member.id);

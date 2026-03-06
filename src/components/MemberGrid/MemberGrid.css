@@ -50,3 +50,31 @@
 .member-grid__loading {
   color: var(--primary);
 }
+
+.member-grid__bookmark-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.member-grid__bookmark-filter:hover {
+  border-color: #f59e0b;
+  color: #f59e0b;
+  background: #fffbeb;
+}
+
+.member-grid__bookmark-filter--active {
+  border-color: #f59e0b;
+  background: #fffbeb;
+  color: #d97706;
+  font-weight: 600;
+}

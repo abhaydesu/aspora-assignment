@@ -61,6 +61,15 @@
   background: var(--warning-light, #fffbeb);
 }
 
+.member-card__bookmark--active {
+  color: #f59e0b;
+}
+
+.member-card__bookmark--active:hover {
+  color: #d97706;
+  background: #fffbeb;
+}
+
 .member-card__name {
   margin: 0;
   font-size: 0.9375rem;

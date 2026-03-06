@@ -13,6 +13,7 @@ interface MemberGridProps {
 export const MemberGrid: React.FC<MemberGridProps> = ({ onSelectMember, columns = 3 }) => {
   const [members, setMembers] = useState<Member[]>([]);
   const [bookmarks, setBookmarks] = useState<Set<number>>(new Set());
+  const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
   const { filters } = useFilters();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -44,22 +45,29 @@ export const MemberGrid: React.FC<MemberGridProps> = ({ onSelectMember, columns 
     setBookmarks(next);
   };
 
-  const displayMembers = members.map(m => ({
-    ...m,
-    bookmarked: bookmarks.has(m.id)
-  }));
+  const displayMembers = members
+    .map(m => ({ ...m, bookmarked: bookmarks.has(m.id) }))
+    .filter(m => !showBookmarkedOnly || m.bookmarked);
 
   if (isLoading) return <div className='member-grid__loading'>Loading team data...</div>
 
   if (error) return <div className='member-grid__error'>{error}</div>
 
-  const presentBookmarksCount = displayMembers.filter(m => m.bookmarked).length;
+  const presentBookmarksCount = members.filter(m => bookmarks.has(m.id)).length;
 
   return (
     <div className="member-grid">
       <div className="member-grid__header">
         <h2>Team Members ({displayMembers.length})</h2>
-        <span>Bookmarked: {presentBookmarksCount}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span>Bookmarked: {presentBookmarksCount}</span>
+          <button
+            className={`member-grid__bookmark-filter${showBookmarkedOnly ? ' member-grid__bookmark-filter--active' : ''}`}
+            onClick={() => setShowBookmarkedOnly(v => !v)}
+          >
+            ★ {showBookmarkedOnly ? 'All Members' : 'Bookmarked'}
+          </button>
+        </div>
       </div>
       <div className="member-grid__cards" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
         {displayMembers.length === 0 && <p className="member-grid__empty">No members found</p>}
