@@ -15,7 +15,7 @@ export const ActivityFeed: React.FC = () => {
 
   useEffect(() => {
     fetchActivities().then(data => {
-      setActivities(prev => [...prev, ...data]);
+      setActivities(data);
     });
   }, []);
 
@@ -60,7 +60,7 @@ export const ActivityFeed: React.FC = () => {
       </div>
       <div className="activity-feed__list">
         {filtered.map((activity, index) => (
-          <div key={index} className="activity-feed__item">
+          <div key={activity.id} className="activity-feed__item">
             <input
               type="checkbox"
               checked={selectedIds.includes(activity.memberId)}

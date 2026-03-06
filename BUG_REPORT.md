@@ -117,3 +117,43 @@
 - **Root cause — the why:** The `bindNotificationHandlers` function used  `var` for declaration inside the loop to generate click handlers. Because `var` is function-scoped, only one `i` variable was created in memory for the entire loop. By the time the user actually clicked a button, the loop had already finished running, meaning `i` was locked at `notifications.length`.
 - **Fix and why it works:** Changed `var` to `let i = 0` in the loop signature. Because `let` is strict block-scoped, JavaScript generates a brand-new, distinct `i` variable in memory for every single iteration of the loop.
 - **Connected to another bug?** no
+
+## Bug 10 — Application Crash on Unassigned Member Modal
+
+- **Exact error / console output:** `Uncaught TypeError: Cannot read properties of null (reading 'name') at getTeamDisplay (helpers.ts:5:46)`
+- **Steps to reproduce:**
+  1. Open the app at `localhost:5173`.
+  2. Locate a member on the dashboard who is "Unassigned".
+  3. Click their card to open the Member Modal.
+- **Viewport / device tested:** Desktop Chrome
+- **Symptom — what you saw:** The entire React application crashed to a white screen the moment the card was clicked.
+- **Root cause — the why:** The `getTeamDisplay` helper function checked if the member's team was an object using `typeof member.team === 'object'`. But, `typeof null` evaluates to `'object'`. Therefore, for unassigned members, the condition passed, and the code attempted to access the `.name` property on a `null` value, triggering a `TypeError`.
+- **Fix and why it works:** Updated the conditional logic to also check if `member.team` exists. Since `null` is a falsy value, the condition fails immediately for unassigned members.
+- **Connected to another bug?** no
+
+## Bug 11 — Activity Feed Duplicates on Mount
+
+- **Exact error / console output:** no console error (visual data duplication).
+- **Steps to reproduce:**
+  1. Open the app at `localhost:5173`.
+  2. Navigate to the Activity Feed page.
+  3. Observe the list of activities on initial load.
+- **Viewport / device tested:** Desktop Chrome
+- **Symptom — what you saw:** Every item in the activity feed was duplicated. 
+- **Root cause — the why:** The `useEffect` responsible for fetching initial data used a state update to append incoming data: `setActivities(prev => [...prev, ...data])`. In development, React 18's `<StrictMode>` intentionally double-mounts components. This fired two concurrent API requests. When both resolved, the second request appended its data directly onto the results of the first, causing duplication.
+- **Fix and why it works:** Changed the state update logic to `setActivities(data)`. Because this is an initial page load, replacing the entire array instead of appending guarantees that even if Strict Mode fetches the data twice, the state is simply overwritten with the exact same correct array.
+- **Connected to another bug?** no
+
+## Bug 12 — Activity Feed - Index as Key
+
+- **Exact error / console output:** no console error (visual state mismatch).
+- **Steps to reproduce:**
+  1. Open the app and navigate to the Activity Feed page.
+  2. Type a unique message into the "Add note..." input field of the very first activity in the list.
+  3. Change the Sort dropdown from "Newest First" to "Oldest First" (or use the filter text input).
+  4. Observe the text in the input fields after the list reorders.
+- **Viewport / device tested:** Desktop Chrome
+- **Symptom — what you saw:** The text typed into an activity's input field did not stay with the correct activity when the list was reordered. Instead, the text stayed permanently locked to its physical position on the screen.
+- **Root cause — the why:** The `.map()` function rendering the activity list used the array `index` as the React `key` prop (`key={index}`). When the array was sorted or filtered, the data objects changed positions, but the index sequence (0, 1, 2...) remained identical, leaving the input's internal state stranded in the wrong row.
+- **Fix and why it works:** Changed the `key` prop to use  `activity.id`. By giving React a unique ID instead of an index, React is forced to track the specific DOM node tied to that exact data object, moving the input state along with the item whenever the array is reordered.
+- **Connected to another bug?** no

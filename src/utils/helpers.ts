@@ -1,7 +1,7 @@
 import type { Notification, Member } from '../api/mockData';
 
 export function getTeamDisplay(member: Member): string {
-  if (typeof member.team === 'object') {
+  if (member.team && typeof member.team === 'object') {
     return (member.team as { name: string }).name;
   }
   return 'Unassigned';
