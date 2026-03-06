@@ -11,13 +11,28 @@ export const ActivityFeed: React.FC = () => {
   const [sortBy, setSortBy] = useState<'newest' | 'oldest'>('newest');
   const [filterText, setFilterText] = useState('');
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
   const { showToast } = useToast();
 
   useEffect(() => {
-    fetchActivities().then(data => {
-      setActivities(data);
-    });
+    setIsLoading(true);
+    setError(null);
+
+    fetchActivities()
+      .then(data => {
+        setActivities(data);
+        setIsLoading(false);
+      })
+      .catch(() => {
+        setError("Could not load activity feed.");
+        setIsLoading(false);
+      });
   }, []);
+
+  if (isLoading) return <div className="activity-feed__loading">Loading activities...</div>;
+  if (error) return <div className="activity-feed__error">{error}</div>;
 
   const sorted = [...activities].sort((a, b) => {
     const aTime = new Date(a.timestamp).getTime();
@@ -59,7 +74,8 @@ export const ActivityFeed: React.FC = () => {
         </button>
       </div>
       <div className="activity-feed__list">
-        {filtered.map((activity, index) => (
+        {filtered.length === 0 && <p className="activity-feed__empty">No activities found</p>}
+        {filtered.map((activity) => (
           <div key={activity.id} className="activity-feed__item">
             <input
               type="checkbox"

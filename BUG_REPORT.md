@@ -198,7 +198,7 @@
 - **Fix and why it works:** Updated the CSS media query for the `.stats-cards` container at the `768px` breakpoint to use `grid-template-columns: 1fr;`. This ensures that on mobile devices, each card takes up 100% of the available fractional space,in a single column.
 - **Connected to another bug?** no
 
-## Bug 15 — Toast Animation Fails to Play
+## Bug 16 — Toast Animation Fails to Play
 
 - **Exact error / console output:** no console error
 - **Steps to reproduce:**
@@ -210,3 +210,32 @@
 - **Root cause — the why:** The `ToastItem` component was hardcoded to mount with the `toast--visible` class already applied. A CSS `transition` requires the browser to paint an initial "before" state and then detect a change to the "after" state . Because the component was injected into the DOM already holding the final state class, the browser skipped the transition entirely and painted it at its final position.
 - **Fix and why it works:** Replaced the CSS `transition` and `.toast--visible` class logic with a pure CSS `@keyframes` `animation` applied directly to the base `.toast` class, resulting in a smooth slide-in effect.
 - **Connected to another bug?** no
+
+## Bug 17 — Toast ID Collisions
+
+- **Exact error / console output:** no console error
+- **Steps to reproduce:**
+- **Viewport / device tested:** Desktop Chrome
+- **Symptom — what you saw:** nextId was defined as a standard local variable within a functional component, it would re-initialize to 0 every time React re-rendered the provider.
+- **Root cause — the why:** Aunctional components in React are functions that re-run entirely on every render. Any variable declared with let or const inside the function body does not persist its value.
+- **Fix and why it works:** Replaced the local variable with `useRef()` hook, because values decalred using useRef persist through re-renders.
+- **Connected to another bug?** no
+
+## Bug 18 — Missing Data Lifecycle States (Loading/Error)
+
+- **Exact error / console output:** No console error
+- **Steps to reproduce:**
+    1. Open the app and navigate to the Dashboard.
+    2. Simulate a slow network (Throttling: Slow 3G) in the browser's Network tab.
+    3. Observe the `MemberGrid` area while the data is fetching.
+    4. Simulate an API failure and observe the result.
+- **Viewport / device tested:** Desktop Chrome
+- **Symptom — what you saw:** On initial load or when filters were changed, the grid immediately displayed the "No members found" message even while the data was still being fetched.
+- **Root cause — the why:** The `MemberGrid` and `ActivityFeed` components only handled the "Success" state of the `fetch` promise. 
+- **Fix and why it works:** Introduced `isLoading` and `error` states to the data-fetching components. 
+    1. Added `setIsLoading(true)` at the start of the `useEffect` and `false` after the promise settles.
+    2. Added a `.catch()` block to capture API failures and update the `error` state.
+    3. Implemented conditional early returns to display a loading indicator or error message, ensuring the "No members found" message only appears if the API successfully returns an empty array.
+- **Connected to another bug?** No
+
+---

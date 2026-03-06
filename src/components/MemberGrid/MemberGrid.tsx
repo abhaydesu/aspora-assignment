@@ -15,10 +15,23 @@ export const MemberGrid: React.FC<MemberGridProps> = ({ onSelectMember, columns 
   const [bookmarks, setBookmarks] = useState<Set<number>>(new Set());
   const { filters } = useFilters();
 
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+
+
   useEffect(() => {
-    fetchMembers(filters).then(data => {
-      setMembers(data);
-    });
+    setIsLoading(true);
+    setError(null);
+    fetchMembers(filters)
+      .then(data => {
+        setMembers(data);
+        setIsLoading(false);
+      })
+      .catch(() => {
+        setError("Failed to load team members. Please try again.");
+        setIsLoading(false);
+      })
   }, [ filters.status, filters.role]);
 
   const handleBookmark = (id: number) => {
@@ -35,6 +48,10 @@ export const MemberGrid: React.FC<MemberGridProps> = ({ onSelectMember, columns 
     ...m,
     bookmarked: bookmarks.has(m.id)
   }));
+
+  if (isLoading) return <div className='member-grid__loading'>Loading team data...</div>
+
+  if (error) return <div className='member-grid__error'>{error}</div>
 
   const presentBookmarksCount = displayMembers.filter(m => m.bookmarked).length;
 
