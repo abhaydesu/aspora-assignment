@@ -184,3 +184,16 @@
 - **Root cause — the why:** The UI was hardcoded to render `{bookmarks.size}`, the counter remained static when filters were applied.
 - **Fix and why it works:** Replaced `{bookmarks.size}` with derived state logic. Created a `visibleBookmarkedCount` variable that filters the currently displayed array. So the count now dynamically stays perfectly in sync with whatever data is actively on the screen.
 - **Connected to another bug?** no
+
+## Bug 15 — Stats Cards Layout Breaks Spec on Mobile 
+
+- **Exact error / console output:** no console error.
+- **Steps to reproduce:**
+  1. Open the app at `localhost:5173`.
+  2. Resize the browser window to a mobile width (768px or smaller) or use Chrome DevTools device simulation.
+  3. Look at the Stats Cards at the top of the dashboard.
+- **Viewport / device tested:** Mobile (< 768px)
+- **Symptom — what you saw:** On mobile screens, the stats cards scrunched together into 2 columns. This violates the spec, which dictates they should be in a single column.
+- **Root cause — the why:** The CSS media query for the stats grid was incorrectly written to apply `grid-template-columns: 1fr 1fr;`. This forced the browser to show two columns in mobile viewport.
+- **Fix and why it works:** Updated the CSS media query for the `.stats-cards` container at the `768px` breakpoint to use `grid-template-columns: 1fr;`. This ensures that on mobile devices, each card takes up 100% of the available fractional space,in a single column.
+- **Connected to another bug?** no

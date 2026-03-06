@@ -6,7 +6,7 @@
 
 @media (max-width: 768px) {
   .stats-cards {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
   }
 }
 
