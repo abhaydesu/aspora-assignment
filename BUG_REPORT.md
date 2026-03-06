@@ -157,3 +157,30 @@
 - **Root cause — the why:** The `.map()` function rendering the activity list used the array `index` as the React `key` prop (`key={index}`). When the array was sorted or filtered, the data objects changed positions, but the index sequence (0, 1, 2...) remained identical, leaving the input's internal state stranded in the wrong row.
 - **Fix and why it works:** Changed the `key` prop to use  `activity.id`. By giving React a unique ID instead of an index, React is forced to track the specific DOM node tied to that exact data object, moving the input state along with the item whenever the array is reordered.
 - **Connected to another bug?** no
+
+## Bug 13 — Batch Assignment False Success
+
+- **Exact error / console output:** no console error.
+- **Steps to reproduce:**
+  1. Open the app and navigate to the Activity Feed page.
+  2. Select multiple activities using the checkboxes.
+  4. Click the "Batch Assign Role" button.
+- **Viewport / device tested:** Desktop Chrome
+- **Symptom — what you saw:** The "All roles updated!" success toast appeared instantly on the screen. If any request failed, the UI ignored it entirely and still declared a success.
+- **Root cause — the why:** The `batchAssignRole` utility function used `forEach` to iterate over the member IDs and trigger the `async` update functions. Because `forEach` is strictly synchronous, it does not `await` promises. It simply fired moved to the next line of code, triggering the `onSuccess()` callback in a `setTimeout` before the server had actually processed the updates.
+- **Fix and why it works:** Refactored the iteration to use `.map()` instead of `.forEach()`, which transforms the array of IDs into an array of pending Promises. Wrapped this in `await Promise.allSettled(...)` to force JavaScript to pause execution until every single request finishes. Finally, added logic to count the rejected promises in the results array.
+- **Connected to another bug?** no
+
+## Bug 14 — Bookmarks Count with Filters
+
+- **Exact error / console output:** no console error (logical UI mismatch).
+- **Steps to reproduce:**
+  1. Open the app at `localhost:5173`.
+  2. Bookmark 3 different members.
+  3. Use the sidebar to filter the dashboard by a specific role (e.g., "Designer") so that only 1 of your bookmarked members is visible on the screen.
+  4. Look at the "Bookmarked" counter at the top of the grid.
+- **Viewport / device tested:** Desktop Chrome
+- **Symptom — what you saw:** The "Bookmarked" count always displayed the total number of bookmarks, regardless of current filters.
+- **Root cause — the why:** The UI was hardcoded to render `{bookmarks.size}`, the counter remained static when filters were applied.
+- **Fix and why it works:** Replaced `{bookmarks.size}` with derived state logic. Created a `visibleBookmarkedCount` variable that filters the currently displayed array. So the count now dynamically stays perfectly in sync with whatever data is actively on the screen.
+- **Connected to another bug?** no

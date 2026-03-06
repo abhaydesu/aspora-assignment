@@ -6,13 +6,17 @@ export async function batchAssignRole(
   onError: (msg: string) => void
 ): Promise<void> {
   try {
-    memberIds.forEach(async (id) => {
-      await updateFn(id, role);
-    });
+    const updatePromise = memberIds.map(id => updateFn(id, role));
 
-    setTimeout(() => {
+    const results = await Promise.allSettled(updatePromise);
+
+    const failedCount = results.filter(result => result.status === 'rejected').length;
+
+    if (failedCount > 0) {
+      onError(`Batch update finished, but ${failedCount} updates failed.`)
+    } else {
       onSuccess();
-    }, 0);
+    }
   } catch (err) {
     onError(err instanceof Error ? err.message : 'Batch operation failed');
   }

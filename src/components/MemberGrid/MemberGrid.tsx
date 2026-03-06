@@ -36,11 +36,13 @@ export const MemberGrid: React.FC<MemberGridProps> = ({ onSelectMember, columns 
     bookmarked: bookmarks.has(m.id)
   }));
 
+  const presentBookmarksCount = displayMembers.filter(m => m.bookmarked).length;
+
   return (
     <div className="member-grid">
       <div className="member-grid__header">
         <h2>Team Members ({displayMembers.length})</h2>
-        <span>Bookmarked: {bookmarks.size}</span>
+        <span>Bookmarked: {presentBookmarksCount}</span>
       </div>
       <div className="member-grid__cards" style={{ gridTemplateColumns: `repeat(${columns}, 1fr)` }}>
         {displayMembers.length === 0 && <p className="member-grid__empty">No members found</p>}
