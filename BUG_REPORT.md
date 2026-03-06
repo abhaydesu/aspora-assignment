@@ -37,3 +37,16 @@
 - **Root cause — the why:** The `updateFilter` function in `FilterContext` was directly mutating the state object using a forced override: `(filters as unknown as Record<string, string>)[key] = value;`. and passing that same object reference back into `setFilters`. Because of which React did not re-render, leaving the UI stale.
 - **Fix and why it works:** Replaced the state updation logic using the spread operator. This generates a brand-new object in memory, forcing React to re-render.
 - **Connected to another bug?** Yes. Connected to Bug 2, which previously masked this issue via forced, continuous re-renders.
+
+## Bug 4 — Standup Timer Freezes (Stale Closure)
+
+- **Exact error / console output:** no console error 
+- **Steps to reproduce:**
+  1. Open the app at `localhost:5173`.
+  2. Locate the "Next Standup" timer on the dashboard.
+  3. Watch the timer for a few seconds.
+- **Viewport / device tested:** Desktop Chrome
+- **Symptom — what you saw:** The countdown timer goes down by one second and then doesn't change. 
+- **Root cause — the why:** The `useEffect` had an empty dependency array but referenced the `timeLeft` state inside the `setInterval`. The interval captured the initial value of `timeLeft` when the component mounted, and kept redundantly setting the state to `initialState - 1` every single second. Also, the interval lacked a cleanup function, leaving a timer running in the background.
+- **Fix and why it works:** Updated the `useEffect` to recalculate the absolute time difference every second (`setTimeLeft(getSecondsUntilStandup())`) instead of doing relative math (`timeLeft - 1`). Added `return () => clearInterval(clockTimer);` to properly clean the interval when the component unmounts.
+- **Connected to another bug?** no
