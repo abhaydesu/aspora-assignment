@@ -19,8 +19,10 @@ export const FilterProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   });
 
   const updateFilter = (key: keyof FilterState, value: string) => {
-    (filters as unknown as Record<string, string>)[key] = value;
-    setFilters(filters);
+    setFilters(prevFilter => ({
+      ...prevFilter,
+      [key] : value
+    }));
   };
 
   return (

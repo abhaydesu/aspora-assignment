@@ -19,7 +19,7 @@ export const MemberGrid: React.FC<MemberGridProps> = ({ onSelectMember, columns 
     fetchMembers(filters).then(data => {
       setMembers(data);
     });
-  }, [{ status: filters.status, role: filters.role }]);
+  }, [ filters.status, filters.role]);
 
   const handleBookmark = (id: number) => {
     const next = new Set(bookmarks);
