@@ -69,8 +69,10 @@ export function useCommentSearch(debouncedQuery: string): UseCommentSearchReturn
 
         const lowerQuery = debouncedQuery.toLowerCase();
         const filtered = comments.filter((c) =>
-          c.body.toLowerCase().includes(lowerQuery),
-        );
+  c.body.toLowerCase().includes(lowerQuery) ||
+  c.name.toLowerCase().includes(lowerQuery) ||
+  c.email.toLowerCase().includes(lowerQuery)
+);
 
         if (currentSearchId === searchIdRef.current && mountedRef.current) {
           setResults(filtered);
