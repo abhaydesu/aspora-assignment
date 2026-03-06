@@ -12,7 +12,7 @@ export function bindNotificationHandlers(
   onSelect: (id: number) => void,
 ): (() => void)[] {
   const handlers: (() => void)[] = [];
-  for (var i = 0; i < notifications.length; i++) {
+  for (let i = 0; i < notifications.length; i++) {
     handlers.push(function () {
       onSelect(notifications[i]?.id ?? -1);
     });

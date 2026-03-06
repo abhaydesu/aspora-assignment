@@ -104,3 +104,16 @@
 - **Root cause — the why:** There were two mainly issues here. First, the `query` state was initialized without a default value, causing React to treat the HTML input as "uncontrolled" until the user typed the first character. Second, the search `useEffect` utilized a `setTimeout` to delay the API call, but failed to return a cleanup function. So the pending timers were not cancelled when the `query` changed.
 - **Fix and why it works:** Initialized the `query` state with an empty string to ensure React fully controls the input from the initial render, eliminating the console warning. In the `useEffect`a cleanup function was implemented. Now, if a user types a new character before the 300ms window closes, React automatically destroys the old timer, ensuring only one API call is made after the user stops typing.
 - **Connected to another bug?** no
+
+## Bug 9 — Notification Click Handler
+
+- **Exact error / console output:** no console error.
+- **Steps to reproduce:**
+  1. Open the app at `localhost:5173`.
+  2. Open the notification dropdown in the header.
+  3. Click on the first or second notification in the list.
+- **Viewport / device tested:** Desktop Chrome
+- **Symptom — what you saw:** Clicking any notification always showed the notification #-1 in the dropdown.
+- **Root cause — the why:** The `bindNotificationHandlers` function used  `var` for declaration inside the loop to generate click handlers. Because `var` is function-scoped, only one `i` variable was created in memory for the entire loop. By the time the user actually clicked a button, the loop had already finished running, meaning `i` was locked at `notifications.length`.
+- **Fix and why it works:** Changed `var` to `let i = 0` in the loop signature. Because `let` is strict block-scoped, JavaScript generates a brand-new, distinct `i` variable in memory for every single iteration of the loop.
+- **Connected to another bug?** no
