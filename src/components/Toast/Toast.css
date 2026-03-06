@@ -7,6 +7,14 @@
   flex-direction: column;
   gap: 10px;
 }
+@keyframes slideInRight {
+  0% {
+    transform: translateX(120%);
+  }
+  100%{
+    transform: translateX(0);
+  }
+}
 
 .toast {
   padding: 14px 20px;
@@ -22,6 +30,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  animation: slideInRight 0.3s ease-out forwards;
 }
 
 .toast--visible {

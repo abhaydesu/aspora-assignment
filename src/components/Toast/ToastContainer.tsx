@@ -41,7 +41,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
 const ToastItem: React.FC<{ toast: Toast }> = ({ toast }) => {
   return (
-    <div className={`toast toast--${toast.type} toast--visible`}>
+    <div className={`toast toast--${toast.type}`}>
       {toast.message}
     </div>
   );

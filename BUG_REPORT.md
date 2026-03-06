@@ -197,3 +197,16 @@
 - **Root cause — the why:** The CSS media query for the stats grid was incorrectly written to apply `grid-template-columns: 1fr 1fr;`. This forced the browser to show two columns in mobile viewport.
 - **Fix and why it works:** Updated the CSS media query for the `.stats-cards` container at the `768px` breakpoint to use `grid-template-columns: 1fr;`. This ensures that on mobile devices, each card takes up 100% of the available fractional space,in a single column.
 - **Connected to another bug?** no
+
+## Bug 15 — Toast Animation Fails to Play
+
+- **Exact error / console output:** no console error
+- **Steps to reproduce:**
+  1. Open the app at `localhost:5173`.
+  2. Trigger a toast notification
+  3. Observe how the toast notification enters the screen.
+- **Viewport / device tested:** Desktop Chrome
+- **Symptom — what you saw:** The toast notification instantly snapped onto the screen instead of sliding in smoothly. The CSS transition completely failed to execute.
+- **Root cause — the why:** The `ToastItem` component was hardcoded to mount with the `toast--visible` class already applied. A CSS `transition` requires the browser to paint an initial "before" state and then detect a change to the "after" state . Because the component was injected into the DOM already holding the final state class, the browser skipped the transition entirely and painted it at its final position.
+- **Fix and why it works:** Replaced the CSS `transition` and `.toast--visible` class logic with a pure CSS `@keyframes` `animation` applied directly to the base `.toast` class, resulting in a smooth slide-in effect.
+- **Connected to another bug?** no
